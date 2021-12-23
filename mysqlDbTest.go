@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,7 +23,7 @@ func runMySqlDbTest() {
 	db := dbConn()
 
 	// Select test
-	println("SELECT TEST")
+	fmt.Println("SELECT TEST")
 	selDB, err := db.Query("SELECT id, usr_email, password, ifnull(last_login, ''), ifnull(firstname, ''), " +
 		"ifnull(lastname, '') FROM USERS ORDER BY id DESC")
 	if err != nil {
@@ -36,16 +37,16 @@ func runMySqlDbTest() {
 		if err != nil {
 			panic(err.Error())
 		}
-		println("id : ", id)
-		println("usrEmail : ", usrEmail)
-		println("password : ", password)
-		println("lastLogin : ", lastLogin)
-		println("firstname : ", firstName)
-		println("lastname : ", lastName)
+		fmt.Println("id : ", id)
+		fmt.Println("usrEmail : ", usrEmail)
+		fmt.Println("password : ", password)
+		fmt.Println("lastLogin : ", lastLogin)
+		fmt.Println("firstname : ", firstName)
+		fmt.Println("lastname : ", lastName)
 	}
 
 	// TODO: Insert Test
-	println("INSERT TEST")
+	fmt.Println("INSERT TEST")
 	usrEmail := "indra.nureska@gmail.com"
 	password := "password"
 	firstName := "Indra"
@@ -65,7 +66,7 @@ func runMySqlDbTest() {
 			panic(err.Error())
 		} else {
 			// TODO: Update Test
-			println("UPDATE TEST")
+			fmt.Println("UPDATE TEST")
 			dbUpdate, err := db.Prepare("UPDATE USERS SET firstname=?, lastname=? WHERE id=?")
 			if err != nil {
 				panic(err.Error())
@@ -73,7 +74,7 @@ func runMySqlDbTest() {
 			dbUpdate.Exec("ID", "INNUR", id)
 
 			// TODO: Delete Test
-			println("DELETE TEST")
+			fmt.Println("DELETE TEST")
 			delForm, err := db.Prepare("DELETE FROM USERS WHERE id=?")
 			if err != nil {
 				panic(err.Error())

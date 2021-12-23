@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -34,21 +35,39 @@ func runMongoDbTest() {
 		userCollection := client.Database("blogdb").Collection("users")
 
 		// Select Test
-		println("Select test")
-
+		fmt.Println("Select test")
+		// convert id string to ObjectId
+		objectId, err := primitive.ObjectIDFromHex("61c42fe7dda6e33854e3c2e1")
+		if err != nil {
+			fmt.Println("Invalid id")
+		} else {
+			var result bson.M
+			filter := bson.M{"_id": objectId}
+			err := userCollection.FindOne(context.TODO(), filter).Decode(&result)
+			if err != nil {
+				panic(err)
+			} else {
+				fmt.Println(result)
+			}
+		}
 
 		// Insert Test
-		println("Insert test")
-		// doc := bson.D{{"usr_email", "indra.nureska@gmail.com"}, {"password", "Password1"}, {"last_login", ""}, {"firstname", ""}, {"lastname", ""}}
+		fmt.Println("Insert test")
+		doc := bson.D{{"usr_email", "indra.nureska@gmail.com"}, {"password", "Password1"}, {"last_login", ""}, {"firstname", ""}, {"lastname", ""}}
 
-		// result, err := userCollection.InsertOne(context.TODO(), doc)
-		// fmt.Printf("Inserted document with _id: %v\n", result.InsertedID)
+		insertResult, err := userCollection.InsertOne(context.TODO(), doc)
+		fmt.Printf("Inserted document with _id: %v\n", insertResult.InsertedID)
 
-		// Update Test
-		println("Update test")
+		if err != nil {
+			panic(err)
+		} else {
+			// Update Test
+			fmt.Println("Update test")
 
-		// Delete Test
-		println("Delete test")
+			// Delete Test
+			fmt.Println("Delete test")
+		}
+
 	}
 
 }
