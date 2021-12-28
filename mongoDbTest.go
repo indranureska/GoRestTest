@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,18 +16,20 @@ import (
 const uri = "mongodb://127.0.0.1:27017"
 
 func runMongoDbTest() {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
 	// Create a new client and connect to the server
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
+		if err = client.Disconnect(ctx); err != nil {
 			panic(err)
 		}
 	}()
 	// Ping the primary
-	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	} else {
 		fmt.Println("Successfully connected and pinged.")
@@ -43,7 +46,7 @@ func runMongoDbTest() {
 		} else {
 			var result bson.M
 			filter := bson.M{"_id": objectId}
-			err := userCollection.FindOne(context.TODO(), filter).Decode(&result)
+			err := userCollection.FindOne(ctx, filter).Decode(&result)
 			if err != nil {
 				panic(err)
 			} else {
@@ -55,7 +58,7 @@ func runMongoDbTest() {
 		fmt.Println("Insert test")
 		doc := bson.D{{"usr_email", "indra.nureska@gmail.com"}, {"password", "Password1"}, {"last_login", ""}, {"firstname", ""}, {"lastname", ""}}
 
-		insertResult, err := userCollection.InsertOne(context.TODO(), doc)
+		insertResult, err := userCollection.InsertOne(ctx, doc)
 		fmt.Printf("Inserted document with _id: %v\n", insertResult.InsertedID)
 
 		if err != nil {
@@ -63,9 +66,22 @@ func runMongoDbTest() {
 		} else {
 			// Update Test
 			fmt.Println("Update test")
+			updateResult, err := userCollection.UpdateOne(
+				ctx, bson.M{"_id": insertResult.InsertedID},
+				bson.D{{"$set", bson.D{{"firstname", "Indra"}}}},
+			)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("Updated %v Documents!\n", updateResult.ModifiedCount)
 
 			// Delete Test
 			fmt.Println("Delete test")
+			delResult, err := userCollection.DeleteOne(ctx, bson.M{"_id": insertResult.InsertedID})
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("DeleteOne removed %v document(s)\n", delResult.DeletedCount)
 		}
 
 	}
