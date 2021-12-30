@@ -12,6 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+type Users struct {
+	UserEmail string    `bson:"usr_email"`
+	Password  string    `bson:"password"`
+	LastLogin time.Time `bson:"last_login"`
+	FirstName string    `bson:"firstname"`
+	LastName  string    `bson:"lastname"`
+}
+
 // Connection URI
 const uri = "mongodb://127.0.0.1:27017"
 
@@ -56,15 +64,20 @@ func runMongoDbTest() {
 
 		// Insert Test
 		fmt.Println("Insert test")
-		doc := bson.D{{"usr_email", "indra.nureska@gmail.com"}, {"password", "Password1"}, {"last_login", ""}, {"firstname", ""}, {"lastname", ""}}
-
+		doc := &Users{
+			UserEmail: "indra.nureska@gmail.com",
+			Password:  "Password1",
+			FirstName: "Indra",
+			LastName:  "Nureska",
+			LastLogin: time.Now(),
+		}
 		insertResult, err := userCollection.InsertOne(ctx, doc)
 		fmt.Printf("Inserted document with _id: %v\n", insertResult.InsertedID)
 
 		if err != nil {
 			panic(err)
 		} else {
-			// Update Test
+			//Update Test
 			fmt.Println("Update test")
 			updateResult, err := userCollection.UpdateOne(
 				ctx, bson.M{"_id": insertResult.InsertedID},
