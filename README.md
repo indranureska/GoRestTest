@@ -1,1 +1,1 @@
-BlogWebService
+golang restful test
